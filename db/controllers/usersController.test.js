@@ -187,3 +187,52 @@ describe('usersController.deleteUser', () => {
     expect(next).toHaveBeenCalledWith(expect.objectContaining({ error: expect.stringContaining('Database error') }));
   });
 });
+
+describe('usersController.getFilteredUsers', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should return filtered users based on activity, skill level, and gender', async () => {
+    const req = {
+      query: {
+        activityName: 'Golf',
+        skillLevel: 'Intermediate',
+        gender: 'Male',
+      },
+    };
+    const res = { locals: {} };
+    const next = jest.fn();
+
+    db.query.mockResolvedValueOnce({
+      rows: [
+        { firstname: 'John', activityname: 'Golf', skilllevel: 'Intermediate', gender: 'Male' },
+      ],
+    });
+
+    await usersController.getFilteredUsers(req, res, next);
+
+    expect(res.locals.data).toEqual([
+      { firstname: 'John', activityname: 'Golf', skilllevel: 'Intermediate', gender: 'Male' },
+    ]);
+    expect(next).toHaveBeenCalled();
+  });
+
+  it('should handle errors if the query fails', async () => {
+    const req = {
+      query: {
+        activityName: 'Golf',
+        skillLevel: 'Intermediate',
+        gender: 'Male',
+      },
+    };
+    const res = { locals: {} };
+    const next = jest.fn();
+
+    db.query.mockRejectedValueOnce(new Error('Database error'));
+
+    await usersController.getFilteredUsers(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(expect.objectContaining({ error: expect.stringContaining('Database error') }));
+  });
+});
