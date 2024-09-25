@@ -1,5 +1,6 @@
 const request = require('supertest');
 const db = require('../../server/models/usersModel');
+const { app, server } = require('../../server/server');
 
 /*
  * Lets make sure we are in "test mode", so that we don't accidently operate
@@ -39,7 +40,50 @@ beforeAll(async () => {
   }
 });
 
-afterAll(() => db.end());
+afterAll(async () => {
+  await db.end();
+  console.log("closing server")
+  await server.close();
+});
+
+describe('userController Tests', () => {
+  describe('/login', () => {
+    it('logs a user in with the correct username and password', () => {
+
+    });
+    it('sets a session cookie after logging in', () => {
+
+    });
+  });
+
+
+  // get request to main in order to get 
+  describe('/main', () => {
+    it('logs a user in with the correct username and password', () => {
+
+    });
+    it('sets a session cookie after logging in', () => {
+
+    });
+  });
+
+
+  describe('/signup', () => {
+    it('adds a user to the database', () => {
+
+    });
+    it('sends a session cookie in its response', () => {
+
+    });
+  });
+
+  describe('/delete', () => {
+    it('deletes a user from the database', () => {
+
+    });
+  })
+
+});
 
 describe('tests', () => {
   it('does something', () => expect(1).toBe(1));
