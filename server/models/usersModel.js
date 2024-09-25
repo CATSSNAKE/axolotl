@@ -1,9 +1,12 @@
+require('dotenv').config();
 const { Pool } = require('pg'); // Use require('pg') if using CommonJS
 
 let PG_URI;
+
 if (process.env.NODE_ENV === 'server-test') {
   if (!process.env.DATABASE_TEST_URI) {
-    throw Error("No test database connection string found");
+    console.log("No test database connection string found");
+    throw Error("Database Error");
   }
   PG_URI = process.env.DATABASE_TEST_URI;
 }
@@ -13,7 +16,6 @@ else {
     'postgresql://postgres.qjdawteymmlljerttghu:outdoor12buddies34@aws-0-us-west-1.pooler.supabase.com:6543/postgres'; // Update with your connection string
 }
 
-PG_URI = 'postgresql://test-user:JX2xDwKZRorKbvJaXwL6@127.0.0.1:5432/axolotl-test';
 const pool = new Pool({
   connectionString: PG_URI,
 });
