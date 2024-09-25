@@ -1,4 +1,5 @@
 const request = require('supertest');
+const bcrypt = require('bcrypt');
 const db = require('../../server/models/usersModel');
 const { app, server } = require('../../server/server');
 
@@ -41,12 +42,19 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await db.end();
-  console.log("closing server")
-  await server.close();
+  try {
+    await db.end();
+    console.log("closing server")
+    server.close();
+  }
+  catch (error) {
+    throw new Error(`Error cleaning up after tests: ${error}`);
+  }
 });
 
 describe('userController Tests', () => {
+
+
   describe('/login', () => {
     it('logs a user in with the correct username and password', () => {
 
@@ -77,11 +85,37 @@ describe('userController Tests', () => {
     });
   });
 
+  // delete request to /delete endpoint
   describe('/delete', () => {
-    it('deletes a user from the database', () => {
+    let results;
 
+    beforeEach(async () => {
+      try {
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash('password', saltRounds);
+        results = await db.query(
+          'INSERT INTO users (firstname, email, password, city, zipcode, gender, phone) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+          ['bill', 'bill@bill.com', hashedPassword, null, null, null, null]
+        )
+      }
+      catch (error) {
+        throw new Error(`Unable to insert user into database: ${error}`);
+      }
     });
-  })
+
+    afterEach(async () => {
+      try {
+        await db.query('DELETE FROM users');
+      }
+      catch (error) {
+        throw new Error(`Unable to delete data from users database: ${error}`);
+      }
+    });
+
+    it('deletes a user from the database', () => {
+      // return request(app).delete
+    });
+  });
 
 });
 
