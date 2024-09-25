@@ -3,9 +3,20 @@ const bcrypt = require('bcrypt');
 const db = require('../../server/models/usersModel');
 const { app, server } = require('../../server/server');
 
+/**
+ * This integrtion test expects yout o have access to a local posgtres server.
+ * You can define the path to your database with a connection string
+ * assigned to the environment variable DATABASE_TEST_URI.  The server
+ * looks for this value in a .env file in the project's root folder.
+ * 
+ * You can run this test with the command: npm run test:server
+ * jest.server.config.js also sets configuration options specific to this test
+ * and is included in the script portin of package.json.
+ */
+
 /*
  * Lets make sure we are in "test mode", so that we don't accidently operate
- * on the real database
+ * on the real database.  This gets set in the script section of package.json
  */
 if (process.env.NODE_ENV != 'server-test') {
   throw new Error("Tests must be run in the testing environment");
@@ -168,9 +179,4 @@ describe('userController Tests', () => {
     });
 
   });
-
-  describe('tests', () => {
-    it('does something', () => expect(1).toBe(1));
-  });
-
 });
