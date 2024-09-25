@@ -24,13 +24,14 @@ beforeAll(async () => {
         phone bigint
     );`
     );
-
   }
   catch (error) {
     console.log(`beforeAll database setup error: ${error} `);
     throw new Error("Error setting up sql test database")
   }
 });
+
+afterAll(() => db.end());
 
 describe('tests', () => {
   it('does something', () => expect(1).toBe(1));

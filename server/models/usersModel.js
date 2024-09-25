@@ -34,4 +34,13 @@ module.exports = {
       throw err; // Rethrow the error for handling in controllers
     }
   },
+  end: async () => {
+    try {
+      await pool.end();
+      console.log('closing database pool');
+    }
+    catch (error) {
+      console.log(`error closing database pool ${error}`);
+    }
+  },
 };

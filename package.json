@@ -10,7 +10,7 @@
     "watch:server": "nodemon server/server.js",
     "dev": "npm-run-all --parallel watch:*",
     "test": "jest",
-    "test:server": "NODE_ENV=server-test jest --config jest.server.config.js "
+    "test:server": "NODE_ENV=server-test jest --config jest.server.config.js --detectOpenHandles"
   },
   "author": "",
   "license": "ISC",
