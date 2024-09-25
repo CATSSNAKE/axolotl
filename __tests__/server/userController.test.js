@@ -91,12 +91,20 @@ describe('userController Tests', () => {
 
     beforeEach(async () => {
       try {
+
+        /*
+         * We probably do not actually need bcrypt here for these
+         * deletion tests
+         */
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash('password', saltRounds);
         results = await db.query(
-          'INSERT INTO users (firstname, email, password, city, zipcode, gender, phone) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+          `INSERT INTO users (firstname, email, password, city, zipcode, gender, phone)
+          VALUES ($1, $2, $3, $4, $5, $6, $7)
+          RETURNING *` ,
           ['bill', 'bill@bill.com', hashedPassword, null, null, null, null]
-        )
+        );
+        console.log("results:", results);
       }
       catch (error) {
         throw new Error(`Unable to insert user into database: ${error}`);
@@ -112,13 +120,57 @@ describe('userController Tests', () => {
       }
     });
 
-    it('deletes a user from the database', () => {
-      // return request(app).delete
+    it('returns a 200 OK response', () => {
+      return request(app)
+        .delete('/delete')
+        .send({ email: results.rows[0].email })
+        .set('Content-Type', 'application/json')
+        .expect(200);
     });
+
+    it('returns a json object', async () => {
+      const response = await request(app)
+        .delete('/delete')
+        .send({ email: results.rows[0].email })
+        .set('Content-Type', 'application/json')
+        .expect('Content-type', /json/);
+
+      console.log('response.body', response.body);
+      return expect(response.body).toBeDefined();
+    });
+
+    it('it deletes the correct user from the database', async () => {
+      const response = await request(app)
+        .delete('/delete')
+        .send({ email: results.rows[0].email })
+        .set('Content-Type', 'application/json')
+        .expect('Content-type', /json/);
+
+      const selectResult = await db.query(
+        'SELECT * FROM users WHERE email = $1', [results.rows[0].email]
+      );
+      return expect(selectResult.rows.length).toBe(0);
+    });
+
+    /*
+     * We expect this test to fail. Currently there is no validation of a
+     * proper email being send to the server.  We would probably want to 
+     * actually send back a json response ultimately.  This just expects
+     * the global error handler to pick it up.
+     */
+
+    it('should fail went send an invalid email to the server', () => {
+      return request(app)
+        .delete('/delete')
+        .send({ email: 'invalid-email' })
+        .set('Content-Type', 'application/json')
+        .expect(500);
+    });
+
   });
 
-});
+  describe('tests', () => {
+    it('does something', () => expect(1).toBe(1));
+  });
 
-describe('tests', () => {
-  it('does something', () => expect(1).toBe(1));
 });
