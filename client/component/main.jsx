@@ -27,7 +27,7 @@ export default function Main({
   // miles,
   // setMiles,
 }) {
-  const navigate = useNavigate(); // throws errors when trying to test, doesn't seem to be used
+  // const navigate = useNavigate(); // throws errors when trying to test, doesn't seem to be used
   const availActivities = allActivities.filter(
     (a) => !selectedA.hasOwnProperty(a)
   );
@@ -134,7 +134,8 @@ export default function Main({
       const script = document.createElement("script");
       //setting the source of the scipt element to the API
       //***callback=initMap specify the initMap functioin should be called once the script is loaded ****/
-      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyCPg7FdcYJsEj83PpiOaX6Kz385Wrz-KHw&callback=initMap`;
+
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.GM_KEY}&callback=initMap&loading=async`;
       //script will be excuted async, so no blocking of the rest of the page
       script.async = true;
       //script should be executed only after the HTML document has been completed parsed
@@ -143,12 +144,17 @@ export default function Main({
       // Attach initMap to window, making the initMap accessible globally
       window.initMap = initMap;
 
-      //event listener that will run once script is fully loaded
-      script.onload = () => {
-        console.log("Google Maps script loaded successfully.");
-        //initicalize the map, ensuring it only happens after the API is fully loaded
-        initMap(); // Call initMap here to ensure it's called after the script is loaded
-      };
+      /*
+       * Not needed with the callback query param in the script.src url
+       *
+       * //event listener that will run once script is fully loaded
+       * script.onload = () => {
+       *   console.log("Google Maps script loaded successfully.");
+       *  //initicalize the map, ensuring it only happens after the API is fully loaded
+       *  initMap(); // Call initMap here to ensure it's called after the script is loaded
+       * };
+       *
+       */
       //adding the script to the HTML document
       document.body.appendChild(script);
     };
@@ -210,7 +216,7 @@ export default function Main({
           });
         }}
       >
-        <label forhtml="searchActivity">Choose an activity: </label>
+        <label htmlFor="searchActivity">Choose an activity: </label>
         <select
           id="searchActivity"
           className="allInput"
@@ -299,7 +305,7 @@ export default function Main({
         <br></br>
 
         {/* get city */}
-        <label forhtml="city">City: </label>
+        <label htmlFor="city">City: </label>
         <input
           id="city"
           className="allInput"
@@ -312,7 +318,7 @@ export default function Main({
         />
 
         {/* get zipcode */}
-        <label forhtml="zipcode">Zip Code: </label>
+        <label htmlFor="zipcode">Zip Code: </label>
         <input
           id="zipcode"
           className="allInput"
@@ -323,7 +329,7 @@ export default function Main({
             setZipCode(e.target.value);
           }}
         />
-        {/* <label forhtml='className'>Distance: </label>
+        {/* <label htmlFor='className'>Distance: </label>
         <select
           className='allInput'
           id='distance'
@@ -339,9 +345,9 @@ export default function Main({
         </select> */}
 
         {/* get gender */}
-        <label forhtml="gender">Gender: </label>
+        <label htmlFor="gender">Gender: </label>
         <select
-          in="gender"
+          id="gender"
           className="allInput"
           value={gender}
           required
