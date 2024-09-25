@@ -9,7 +9,8 @@
     "watch:build": "webpack -w",
     "watch:server": "nodemon server/server.js",
     "dev": "npm-run-all --parallel watch:*",
-    "test": "jest"
+    "test": "jest",
+    "test:server": "jest --config jest.server.config.js NODE_ENV=server-test"
   },
   "author": "",
   "license": "ISC",
@@ -30,10 +31,8 @@
     "jest-environment-jsdom": "^29.7.0",
     "nodemon": "^3.1.7",
     "npm-run-all": "^4.1.5",
-    "pg-mem": "^3.0.2",
     "style-loader": "^4.0.0",
     "supertest": "^7.0.0",
-    "uuid": "^10.0.0",
     "webpack": "^5.94.0",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.1.0"
