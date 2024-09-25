@@ -27,7 +27,7 @@ export default function Main({
   // miles,
   // setMiles,
 }) {
-  const navigate = useNavigate(); // throws errors when trying to test, doesn't seem to be used
+  // const navigate = useNavigate(); // throws errors when trying to test, doesn't seem to be used
   const availActivities = allActivities.filter(
     (a) => !selectedA.hasOwnProperty(a)
   );
