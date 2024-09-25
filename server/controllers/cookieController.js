@@ -1,4 +1,4 @@
-const db = require('../../db/models/usersModel');
+const db = require('../models/usersModel');
 
 const cookieController = {};
 

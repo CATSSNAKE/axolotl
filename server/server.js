@@ -3,9 +3,9 @@ const app = express();
 const path = require('path');
 const cors = require('cors');
 const PORT = 3000;
-const cookieController = require('../db/controllers/cookieController.js');
+const cookieController = require('./controllers/cookieController.js');
 //import usersController
-const userCont = require('../db/controllers/usersController.js');
+const userCont = require('./controllers/usersController.js');
 
 // parses JSON from incoming request
 app.use(cors());
