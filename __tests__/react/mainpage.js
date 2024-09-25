@@ -1,4 +1,4 @@
-import { getByLabelText, render, screen } from "@testing-library/react";
+import { render, screen, getAllByRole } from "@testing-library/react";
 import React from "react";
 
 import Main from "../../client/component/main";
@@ -26,25 +26,25 @@ describe("Main component tests", () => {
       zipcodes: [],
       setZipcodes: () => {},
     };
-    it("activity dropdown shows available activities", async () => {
-      // this is implementation driven, and will need to change when the frontend changes
-      // uses specific props
+    it("activity dropdown should show available activities", async () => {
+      // implementation driven: uses specific props
       const allActivities = ["A", "B", "C", "D"];
-      const { getByText } = render(
+      const { getByText, getByLabelText } = render(
         <Main {...minimalProps} allActivities={allActivities} />
       );
-      const label = getByText("Choose an activity:");
-      expect(label).not.toBeUndefined();
-      const select = label.nextElementSibling;
+      let select;
       expect(
-        Array.from(select.childNodes).map((childNode) => childNode.textContent)
+        () => (select = getByLabelText("Choose an activity:"))
+      ).not.toThrow();
+      expect(
+        getAllByRole(select, "option").map((option) => option.textContent)
       ).toEqual(["", ...allActivities]);
     });
 
-    it("activity dropdown doesn't include activities that have already been selected", async () => {
-      // this is implementation driven, and will need to change when the frontend changes
+    it("activity dropdown shouldn't include activities that have already been selected", async () => {
+      // implementation driven: uses specific props
       const allActivities = ["A", "B", "C", "D"];
-      const { getByText } = render(
+      const { getByText, getByLabelText } = render(
         <Main
           {...minimalProps}
           allActivities={allActivities}
@@ -52,21 +52,30 @@ describe("Main component tests", () => {
         />
       );
 
-      const label = getByText("Choose an activity:");
-      expect(label).not.toBeUndefined();
-      const select = label.nextElementSibling;
+      let select;
       expect(
-        Array.from(select.childNodes).map((childNode) => childNode.textContent)
+        () => (select = getByLabelText("Choose an activity:"))
+      ).not.toThrow();
+      expect(
+        getAllByRole(select, "option").map((option) => option.textContent)
       ).toEqual(["", ...allActivities.filter((elem) => elem !== "A")]);
     });
 
     it("skill level radio buttons should have Beginner, Intermediate, Advanced", () => {
+      // implementation driven: uses specific props
       const { getByRole, getByText } = render(<Main {...minimalProps} />);
 
       expect(() => getByText(/Choose skill level:/i)).not.toThrow();
       expect(() => getByRole("radio", { name: "Beginner" })).not.toThrow();
       expect(() => getByRole("radio", { name: "Intermediate" })).not.toThrow();
       expect(() => getByRole("radio", { name: "Advanced" })).not.toThrow();
+    });
+
+    it("should have an 'Add' button", () => {
+      // implementation driven: uses specific props
+      const { getByRole } = render(<Main {...minimalProps} />);
+
+      expect(() => getByRole("button", { name: "Add" })).not.toThrow();
     });
   });
 });
