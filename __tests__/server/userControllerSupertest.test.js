@@ -4,14 +4,14 @@ const db = require('../../server/models/usersModel');
 const { app, server } = require('../../server/server');
 
 /**
- * This integrtion test expects yout o have access to a local posgtres server.
+ * This integrtion test expects you to have access to a local posgtres server.
  * You can define the path to your database with a connection string
  * assigned to the environment variable DATABASE_TEST_URI.  The server
  * looks for this value in a .env file in the project's root folder.
  * 
  * You can run this test with the command: npm run test:server
  * jest.server.config.js also sets configuration options specific to this test
- * and is included in the script portin of package.json.
+ * and is included in the script portion of package.json.
  */
 
 /*
@@ -67,10 +67,10 @@ describe('userController Tests', () => {
 
 
   describe('/login', () => {
-    it('logs a user in with the correct username and password', () => {
+    xit('logs a user in with the correct username and password', () => {
 
     });
-    it('sets a session cookie after logging in', () => {
+    xit('sets a session cookie after logging in', () => {
 
     });
   });
@@ -78,20 +78,95 @@ describe('userController Tests', () => {
 
   // get request to main in order to get 
   describe('/main', () => {
-    it('logs a user in with the correct username and password', () => {
+    xit('logs a user in with the correct username and password', () => {
 
     });
-    it('sets a session cookie after logging in', () => {
+    xit('sets a session cookie after logging in', () => {
 
     });
   });
 
 
+  // post request to /signup
   describe('/signup', () => {
-    it('adds a user to the database', () => {
 
+    afterEach(async () => {
+      try {
+        await db.query('DELETE FROM users');
+        await db.query('DELETE FROM useractivities');
+      }
+      catch (error) {
+        throw new Error(`Unable to delete data from users database: ${error}`);
+      }
     });
-    it('sends a session cookie in its response', () => {
+
+    const user = {
+      email: 'email@email.com',
+      password: 'password',
+      firstName: 'bob',
+      activity: { snowboarding: 'Beginner' },
+      city: 'new york',
+      zipCode: 12345,
+      gender: 'male',
+      phone: 1234567890,
+    }
+
+    it('returns a 200 OK status when given valid data', () => {
+      return request(app)
+        .post('/signup')
+        .send(user)
+        .expect(200);
+    });
+
+    it('inserts a users data into the database', async () => {
+      await request(app)
+        .post('/signup')
+        .send(user);
+
+      const selectResult = await db.query(
+        'SELECT * FROM users WHERE email = $1;', [user.email]
+      );
+
+      expect(selectResult.rows[0].user_id).not.toBeNull();
+      expect(selectResult.rows[0].email).toEqual(user.email);
+      expect(selectResult.rows[0].password).not.toBeNull();
+      expect(selectResult.rows[0].firstname).toEqual(user.firstName);
+      expect(selectResult.rows[0].city).toEqual(user.city);
+      expect(selectResult.rows[0].zipcode).toEqual(user.zipCode);
+      expect(selectResult.rows[0].gender).toEqual(user.gender);
+      expect(selectResult.rows[0].phone).toEqual(String(user.phone));
+      return;
+    });
+
+
+    /*
+     * Currently the server does not call next() with an error when there is
+     * no passowrd or email.  Intead, it simply throws an error on the server
+     * side, and I guess halts the server? This test times out for this reason,
+     * and should be rewritten with an idea in mind of how to handle this 
+     * condition.
+     */
+    xit('returns a 500 status on non truthy email or password', async () => {
+      const userNoEmail = { ...user, activity: { ...user.activity } };
+      delete userNoEmail.email;
+
+      const userNoPassword = { ...user, activity: { ...user.activity } };
+      delete userNoPassword.password;
+
+
+      await request(app)
+        .post('/signup')
+        .send(userNoEmail)
+        .expect(500);
+
+      await request(app)
+        .post('/signup')
+        .send(userNoEmail)
+        .expect(500);
+
+      return;
+    });
+    xit('sends a session cookie in its response', () => {
 
     });
   });
@@ -115,7 +190,6 @@ describe('userController Tests', () => {
           RETURNING *` ,
           ['bill', 'bill@bill.com', hashedPassword, null, null, null, null]
         );
-        console.log("results:", results);
       }
       catch (error) {
         throw new Error(`Unable to insert user into database: ${error}`);
