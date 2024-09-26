@@ -10,8 +10,9 @@
     "watch:server": "nodemon server/server.js",
     "dev": "npm-run-all --parallel watch:*",
     "test": "jest",
-    "test:server": "NODE_ENV=server-test jest --config jest.server.config.js",
-    "test:supertest": "NODE_ENV=server-test jest ./__tests__/server/endpointsSupertest.test.js --config jest.server.config.js"
+    "test:middlewear": "jest ./__tests__/middleware/usersController.test.js",
+    "test:supertest": "NODE_ENV=server-test jest ./__tests__/server/endpointsSupertest.test.js --config jest.server.config.js",
+    "test:server": "NODE_ENV=server-test jest --config jest.server.config.js"
   },
   "author": "",
   "license": "ISC",

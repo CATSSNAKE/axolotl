@@ -54,6 +54,8 @@ beforeAll(async () => {
 
 afterAll(async () => {
   try {
+    await db.query('DELETE FROM users');
+    await db.query('DELETE FROM useractivities');
     await db.end();
     console.log("closing server")
     server.close();
@@ -65,14 +67,12 @@ afterAll(async () => {
 
 describe('userController Tests', () => {
 
-
-  describe('/login', () => {
+  describe('POST /login', () => {
     beforeAll(async () => {
       try {
-
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash('password', saltRounds);
-        results = await db.query(
+        await db.query(
           `INSERT INTO users (firstname, email, password, city, zipcode, gender, phone)
           VALUES ($1, $2, $3, $4, $5, $6, $7)
           RETURNING *` ,
@@ -83,17 +83,80 @@ describe('userController Tests', () => {
         throw new Error(`Unable to insert user into database: ${error}`);
       }
     });
-    xit('logs a user in with the correct username and password', () => {
-
+    afterAll(async () => {
+      try {
+        await db.query('DELETE FROM users');
+      }
+      catch (error) {
+        throw new Error(`Unable to delete data from the database: ${error}`);
+      }
     });
-    xit('sets a session cookie after logging in', () => {
 
+
+    it('sends a 200 code and json when email and password match the db', async () => {
+      const response = await request(app)
+        .post('/login')
+        .send({ email: 'bill@bill.com', password: 'password' })
+        .expect(200)
+        .expect('Content-type', /json/);
+
+      expect(response).toBeDefined();
+
+      expect(response.body).toEqual({
+        string: expect.any(String)
+      });
     });
+    it('sends 500 code and json when email or password are incorrect', async () => {
+      let response = await request(app)
+        .post('/login')
+        .send({ email: 'bill@bill.com', password: 'r' })
+        .expect(500)
+        .expect('Content-type', /json/);
+
+      expect(response).toBeDefined();
+
+      expect(response.body).toEqual({
+        err: expect.any(String)
+      });
+      response = await request(app)
+        .post('/login')
+        .send({ email: 'e', password: 'passwords' })
+        .expect(500)
+        .expect('Content-type', /json/);
+
+      expect(response).toBeDefined();
+
+      expect(response.body).toEqual({
+        err: expect.any(String)
+      });
+    });
+    // this test should be rewritten once validation and error reporting is 
+    // more robust
+    it('should respond helpful json when missing login data', async () => {
+      const response = await request(app)
+        .post('/login')
+        .send({})
+        .expect('Content-type', /json/)
+        .expect(500);
+
+      expect(response).toBeDefined();
+      expect(response.body).toEqual({
+        err: expect.any(String)
+      });
+    });
+    it('returns a cookie', async () => {
+      const response = await request(app)
+        .post('/login')
+        .send({ email: 'bill@bill.com', password: 'password' });
+
+      const cookies = response.headers['set-cookie'];
+      expect(cookies).toBeDefined();
+      expect(cookies[0]).toContain('test=cookie');
+    });
+
   });
 
-
-  // GET request to /main in order to get 
-  describe('/main', () => {
+  describe('GET /main', () => {
     let userOne, userTwo, userThree;
     beforeAll(async () => {
       try {
@@ -173,7 +236,6 @@ describe('userController Tests', () => {
       expect(responseUserThree.activityname).toEqual('Golf');
       expect(responseUserThree.skilllevel).toEqual('Intermediate');
       expect(responseUserThree.gender).toEqual(userThree.rows[0].gender);
-      return;
     });
 
     it('returns json and status 500 if a field is not provided', async () => {
@@ -210,13 +272,9 @@ describe('userController Tests', () => {
         err: expect.any(String)
       });
     });
-
   });
 
-
-  // post request to /signup
-  describe('/signup', () => {
-
+  describe('POST /signup', () => {
     afterEach(async () => {
       try {
         await db.query('DELETE FROM users');
@@ -262,7 +320,6 @@ describe('userController Tests', () => {
       expect(selectResult.rows[0].zipcode).toEqual(user.zipCode);
       expect(selectResult.rows[0].gender).toEqual(user.gender);
       expect(selectResult.rows[0].phone).toEqual(String(user.phone));
-      return;
     });
 
     it('inserts useractivities into the database for valid data', async () => {
@@ -279,7 +336,7 @@ describe('userController Tests', () => {
         [selectResult.rows[0].user_id]
       );
 
-      return expect(activitiesResult.rows.length).toBe(2);
+      expect(activitiesResult.rows.length).toBe(2);
     });
 
     // this is the current way the code works, however for authentication
@@ -317,29 +374,19 @@ describe('userController Tests', () => {
         .post('/signup')
         .send(userNoEmail)
         .expect(500);
-
-      return;
     });
   });
 
-  // delete request to /delete endpoint
-  describe('/delete', () => {
+  describe('DELETE /delete', () => {
     let results;
 
     beforeEach(async () => {
       try {
-
-        /*
-         * We probably do not actually need bcrypt here for these
-         * deletion tests
-         */
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash('password', saltRounds);
         results = await db.query(
           `INSERT INTO users (firstname, email, password, city, zipcode, gender, phone)
           VALUES ($1, $2, $3, $4, $5, $6, $7)
           RETURNING *` ,
-          ['bill', 'bill@bill.com', hashedPassword, null, null, null, null]
+          ['bill', 'bill@bill.com', 'billspassword', null, null, null, null]
         );
       }
       catch (error) {
@@ -371,8 +418,7 @@ describe('userController Tests', () => {
         .set('Content-Type', 'application/json')
         .expect('Content-type', /json/);
 
-      console.log('response.body', response.body);
-      return expect(response.body).toBeDefined();
+      expect(response.body).toBeDefined();
     });
 
     it('it deletes the correct user from the database', async () => {
@@ -385,7 +431,7 @@ describe('userController Tests', () => {
       const selectResult = await db.query(
         'SELECT * FROM users WHERE email = $1', [results.rows[0].email]
       );
-      return expect(selectResult.rows.length).toBe(0);
+      expect(selectResult.rows.length).toBe(0);
     });
 
     /*
@@ -402,6 +448,5 @@ describe('userController Tests', () => {
         .set('Content-Type', 'application/json')
         .expect(500);
     });
-
   });
 });
