@@ -47,7 +47,7 @@ export default function Signup() {
   const phone = useSelector((state) => state.user.phone);
   const selectedA = useSelector((state) => state.activity.selectedA);
   const allActivities = useSelector((state) => state.activity.allActivities);
-  const skillLevel = useSelector((state) => state.user.skillLevel);
+  const skillLevel = useSelector((state) => state.activity.skillLevel);
   const activity = useSelector((state) => state.activity.activity);
 
   // Filter available activities

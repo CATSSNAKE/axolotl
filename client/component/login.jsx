@@ -1,7 +1,13 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { setEmail, setPassword, login, logout, setUserData } from '../redux/userSlice';
+import {
+  setEmail,
+  setPassword,
+  login,
+  logout,
+  setUserData,
+} from '../redux/userSlice';
 
 export default function Login() {
   const dispatch = useDispatch();
@@ -43,7 +49,9 @@ export default function Login() {
         />
         <br></br>
         <div id='bottom'>
-          <button id='linkButton' type='submit'>Login</button>
+          <button id='linkButton' type='submit'>
+            Login
+          </button>
           <Link id='buttonButton' to='/signup'>
             Signup
           </Link>
@@ -53,4 +61,3 @@ export default function Login() {
     </>
   );
 }
-
