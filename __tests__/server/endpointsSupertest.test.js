@@ -67,6 +67,22 @@ describe('userController Tests', () => {
 
 
   describe('/login', () => {
+    beforeAll(async () => {
+      try {
+
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash('password', saltRounds);
+        results = await db.query(
+          `INSERT INTO users (firstname, email, password, city, zipcode, gender, phone)
+          VALUES ($1, $2, $3, $4, $5, $6, $7)
+          RETURNING *` ,
+          ['bill', 'bill@bill.com', hashedPassword, null, null, null, null]
+        );
+      }
+      catch (error) {
+        throw new Error(`Unable to insert user into database: ${error}`);
+      }
+    });
     xit('logs a user in with the correct username and password', () => {
 
     });
@@ -76,14 +92,125 @@ describe('userController Tests', () => {
   });
 
 
-  // get request to main in order to get 
+  // GET request to /main in order to get 
   describe('/main', () => {
-    xit('logs a user in with the correct username and password', () => {
-
+    let userOne, userTwo, userThree;
+    beforeAll(async () => {
+      try {
+        userOne = await db.query(
+          `INSERT INTO users (firstname, email, password, city, zipcode, gender, phone)
+          VALUES ($1, $2, $3, $4, $5, $6, $7)
+          RETURNING *` ,
+          ['bill', 'bill@bill.com', 'billspassword', null, null, 'Male', null]
+        );
+        userTwo = await db.query(
+          `INSERT INTO users (firstname, email, password, city, zipcode, gender, phone)
+          VALUES ($1, $2, $3, $4, $5, $6, $7)
+          RETURNING *` ,
+          ['aimee', 'aimee@aimee.com', 'aimeespassword', null, null, 'Female', null]
+        );
+        userThree = await db.query(
+          `INSERT INTO users (firstname, email, password, city, zipcode, gender, phone)
+          VALUES ($1, $2, $3, $4, $5, $6, $7)
+          RETURNING *` ,
+          ['mary', 'mary@mary.com', 'maryspassword', null, null, 'Female', null]
+        );
+        const activityOne = await db.query(
+          `INSERT INTO useractivities (user_id, activityname, skilllevel) VALUES ($1, $2, $3)
+          RETURNING *` ,
+          [userOne.rows[0].user_id, 'Golf', 'Intermediate']
+        );
+        const activityTwo = await db.query(
+          `INSERT INTO useractivities (user_id, activityname, skilllevel) VALUES ($1, $2, $3)
+          RETURNING *` ,
+          [userTwo.rows[0].user_id, 'Golf', 'Intermediate']
+        );
+        const activityThree = await db.query(
+          `INSERT INTO useractivities (user_id, activityname, skilllevel) VALUES ($1, $2, $3)
+          RETURNING *` ,
+          [userThree.rows[0].user_id, 'Golf', 'Intermediate']
+        );
+      }
+      catch (error) {
+        throw new Error(`Unable to insert user into database: ${error}`);
+      }
     });
-    xit('sets a session cookie after logging in', () => {
 
+    afterAll(async () => {
+      try {
+        await db.query('DELETE FROM users');
+        await db.query('DELETE FROM useractivities');
+      }
+      catch (error) {
+        throw new Error(`Unable to delete data from the database: ${error}`);
+      }
     });
+
+    it('returns a json array of matching user and activity data', async () => {
+      const response = await request(app)
+        .get('/main')
+        .query({
+          activityName: 'Golf', skillLevel: 'Intermediate', gender: 'Female'
+        })
+        .expect('Content-type', /json/)
+        .expect(200);
+
+      expect(response).toBeDefined();
+      expect(response.body.length).toBe(2);
+
+      const responseUserTwo = response.body
+        .filter(obj => obj.user_id === userTwo.rows[0].user_id)[0];
+
+      const responseUserThree = response.body
+        .filter(obj => obj.user_id === userThree.rows[0].user_id)[0];
+
+      expect(responseUserTwo.user_id).toEqual(userTwo.rows[0].user_id);
+      expect(responseUserTwo.activityname).toEqual('Golf');
+      expect(responseUserTwo.skilllevel).toEqual('Intermediate');
+      expect(responseUserTwo.gender).toEqual(userTwo.rows[0].gender);
+
+      expect(responseUserThree.user_id).toEqual(userThree.rows[0].user_id);
+      expect(responseUserThree.activityname).toEqual('Golf');
+      expect(responseUserThree.skilllevel).toEqual('Intermediate');
+      expect(responseUserThree.gender).toEqual(userThree.rows[0].gender);
+      return;
+    });
+
+    it('returns json and status 500 if a field is not provided', async () => {
+      let response = await request(app)
+        .get('/main')
+        .query({ skillLevel: 'Intermediate', gender: 'Female' })
+        .expect('Content-type', /json/)
+        .expect(500);
+
+      expect(response).toBeDefined();
+      expect(response.body).toEqual({
+        err: expect.any(String)
+      });
+
+      response = await request(app)
+        .get('/main')
+        .query({ activityName: 'Golf', gender: 'Female' })
+        .expect('Content-type', /json/)
+        .expect(500);
+
+      expect(response).toBeDefined();
+      expect(response.body).toEqual({
+        err: expect.any(String)
+      });
+
+      response = await request(app)
+        .get('/main')
+        .query({ activityName: 'Golf', skillLevel: 'Intermediate' })
+        .expect('Content-type', /json/)
+        .expect(500);
+
+      expect(response).toBeDefined();
+      expect(response.body).toEqual({
+        err: expect.any(String)
+      });
+    });
+
   });
 
 
@@ -138,7 +265,7 @@ describe('userController Tests', () => {
       return;
     });
 
-    it('inserts useractivities into the database when provided', async () => {
+    it('inserts useractivities into the database for valid data', async () => {
       await request(app)
         .post('/signup')
         .send(user);

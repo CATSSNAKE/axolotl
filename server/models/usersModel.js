@@ -25,7 +25,7 @@ const pool = new Pool({
 // This will be required in the controllers to be the access point to the database
 module.exports = {
   query: async (text, params) => {
-    console.log('executed query', text);
+    // console.log('executed query', text);
     try {
       const res = await pool.query(text, params); // Use await to get result
       return res; // Return the result

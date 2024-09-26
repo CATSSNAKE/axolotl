@@ -1,8 +1,8 @@
-const db = require("../../db/models/usersModel");
+const db = require("../../server/models/usersModel");
 const bcrypt = require("bcrypt");
-const usersController = require("../../db/controllers/usersController");
+const usersController = require("../../server/controllers/usersController");
 
-jest.mock("../../db/models/usersModel", () => ({
+jest.mock("../../server/models/usersModel", () => ({
   query: jest.fn(),
 }));
 jest.mock('bcrypt', () => ({

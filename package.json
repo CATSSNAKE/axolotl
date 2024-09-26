@@ -10,7 +10,8 @@
     "watch:server": "nodemon server/server.js",
     "dev": "npm-run-all --parallel watch:*",
     "test": "jest",
-    "test:server": "NODE_ENV=server-test jest --config jest.server.config.js --detectOpenHandles"
+    "test:server": "NODE_ENV=server-test jest --config jest.server.config.js",
+    "test:supertest": "NODE_ENV=server-test jest ./__tests__/server/endpointsSupertest.test.js --config jest.server.config.js"
   },
   "author": "",
   "license": "ISC",
@@ -45,6 +46,7 @@
     "bcrypt": "^5.1.1",
     "concurrently": "^9.0.1",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "path": "^0.12.7",
     "pg": "^8.13.0",
