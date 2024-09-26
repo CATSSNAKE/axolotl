@@ -1,10 +1,9 @@
-import { expect, jest, it } from "@jest/globals";
-import { render, getAllByRole, waitFor } from "@testing-library/react";
+// import { expect, jest, it } from "@jest/globals";
+import { render, getAllByRole, getByRole } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import React, { useState } from "react";
+import React from "react";
 
 import Main from "../../client/component/main";
-import Dropdown from "../../client/component/Dropdown";
 
 describe("Main component tests", () => {
   /* TODO: as the main page is turned from one component with a wall of html as output,
@@ -82,14 +81,16 @@ describe("Main component tests", () => {
       expect(() => getByText("Delete")).not.toThrow();
     });
 
-    it("skill level radio buttons should have Beginner, Intermediate, Advanced", () => {
+    it("skill level dropdown should show Beginner, Intermediate, Advanced options", async () => {
       // implementation driven: uses specific props
-      const { getByRole, getByText } = render(<Main {...minimalProps} />);
-
-      expect(() => getByText(/Choose skill level:/i)).not.toThrow();
-      expect(() => getByRole("radio", { name: "Beginner" })).not.toThrow();
-      expect(() => getByRole("radio", { name: "Intermediate" })).not.toThrow();
-      expect(() => getByRole("radio", { name: "Advanced" })).not.toThrow();
+      const { getByLabelText } = render(<Main {...minimalProps} />);
+      let select;
+      expect(
+        () => (select = getByLabelText("Choose a skill level:"))
+      ).not.toThrow();
+      expect(
+        getAllByRole(select, "option").map((option) => option.textContent)
+      ).toEqual(["", "Beginner", "Intermediate", "Advanced"]);
     });
 
     it("should have an 'Add' button", () => {
@@ -158,23 +159,33 @@ describe("Main component tests", () => {
     it("should be able to select an activity", async () => {
       const mFunc = jest.fn();
       const user = userEvent.setup();
-      const { getByRole, getByLabelText } = render(
-        <Dropdown
-          labelText="Select:"
-          updater={(e) => mFunc(e.target.value)}
-          options={["A", "B", "C"]}
+      const allActivities = ["A", "B", "C"];
+      const { getByLabelText } = render(
+        <Main
+          {...minimalProps}
+          allActivities={allActivities}
+          setActivity={mFunc}
         />
       );
 
-      await user.selectOptions(getByLabelText("Select:"), "A");
+      const selectElement = getByLabelText("Choose an activity:");
+      await user.selectOptions(selectElement, "A");
 
       expect(mFunc).toHaveBeenCalled();
       expect(mFunc).toHaveBeenCalledWith("A");
 
-      expect(getByRole("option", { name: "" }).selected).toBe(false);
-      expect(getByRole("option", { name: "A" }).selected).toBe(true);
-      expect(getByRole("option", { name: "B" }).selected).toBe(false);
-      expect(getByRole("option", { name: "C" }).selected).toBe(false);
+      expect(getByRole(selectElement, "option", { name: "" }).selected).toBe(
+        false
+      );
+      expect(getByRole(selectElement, "option", { name: "A" }).selected).toBe(
+        true
+      );
+      expect(getByRole(selectElement, "option", { name: "B" }).selected).toBe(
+        false
+      );
+      expect(getByRole(selectElement, "option", { name: "C" }).selected).toBe(
+        false
+      );
     });
 
     xit("should be able to select a skill level", async () => {

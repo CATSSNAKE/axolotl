@@ -225,8 +225,14 @@ export default function Main({
 
         {/* skill level selection */}
 
-        <div className="skillLevelMain">
-          <p>Choose skill level: </p>
+        <Dropdown
+          labelText="Choose a skill level:"
+          updater={(e) => setSkillLevel(e.target.value)}
+          options={["Beginner", "Intermediate", "Advanced"]}
+        />
+
+        {/* <div className="skillLevelMain">
+          <p> </p>
           <label>
             <input
               type="radio"
@@ -257,7 +263,7 @@ export default function Main({
             ></input>
             <span></span> Advanced
           </label>
-        </div>
+        </div> */}
         <br></br>
 
         {/* add button */}
