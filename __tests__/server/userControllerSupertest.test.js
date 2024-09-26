@@ -47,7 +47,7 @@ beforeAll(async () => {
     );
   }
   catch (error) {
-    console.log(`beforeAll database setup error: ${error} `);
+    console.log(`beforeAll database setup error: ${error}`);
     throw new Error("Error setting up sql test database")
   }
 });
@@ -104,7 +104,7 @@ describe('userController Tests', () => {
       email: 'email@email.com',
       password: 'password',
       firstName: 'bob',
-      activity: { snowboarding: 'Beginner' },
+      activity: { snowboarding: 'Beginner', skateboarding: 'Advanced' },
       city: 'new york',
       zipCode: 12345,
       gender: 'male',
@@ -138,6 +138,34 @@ describe('userController Tests', () => {
       return;
     });
 
+    it('inserts useractivities into the database when provided', async () => {
+      await request(app)
+        .post('/signup')
+        .send(user);
+
+      const selectResult = await db.query(
+        'SELECT * FROM users WHERE email = $1;', [user.email]
+      );
+
+      const activitiesResult = await db.query(
+        'SELECT * FROM useractivities WHERE user_id = $1',
+        [selectResult.rows[0].user_id]
+      );
+
+      return expect(activitiesResult.rows.length).toBe(2);
+    });
+
+    // this is the current way the code works, however for authentication
+    // we should think about creating session cookies
+    it('returns a cookie', async () => {
+      const response = await request(app)
+        .post('/signup')
+        .send(user);
+
+      const cookies = response.headers['set-cookie'];
+      expect(cookies).toBeDefined();
+      expect(cookies[0]).toContain('test=cookie');
+    });
 
     /*
      * Currently the server does not call next() with an error when there is
@@ -153,7 +181,6 @@ describe('userController Tests', () => {
       const userNoPassword = { ...user, activity: { ...user.activity } };
       delete userNoPassword.password;
 
-
       await request(app)
         .post('/signup')
         .send(userNoEmail)
@@ -165,9 +192,6 @@ describe('userController Tests', () => {
         .expect(500);
 
       return;
-    });
-    xit('sends a session cookie in its response', () => {
-
     });
   });
 
@@ -244,7 +268,7 @@ describe('userController Tests', () => {
      * the global error handler to pick it up.
      */
 
-    it('should fail went send an invalid email to the server', () => {
+    it('should return status 500 when an invalid email is sent to the server', () => {
       return request(app)
         .delete('/delete')
         .send({ email: 'invalid-email' })
