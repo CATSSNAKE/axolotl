@@ -1,12 +1,19 @@
+// required for using JSX and React components
 import React from 'react';
+// from the React library that allows you to navigate to different endpoints and establish links so that the page won't need to reload
 import { Link, useNavigate } from 'react-router-dom';
+// custom function that handles activity that is imported from another folder
 import handleA from '../handleActivity';
+// same as above but this one has the functionality to delete
 import deleteA from '../deleteActivity';
+// custom function that handles form submission and sends the user data over to the server
 import handleSubmit from '../handleSubmit';
-console.log(handleSubmit);
+// importing state handler and the state updater that can interact with the store
+import { useSelector, useDispatch } from 'react-redux';
+
 export default function Signup({
-  email,
-  setEmail,
+  email, // const email = useSelector(state => state.auth.user.email)
+  setEmail, // create a reducer in your auth state (ie. updateEmail), and then call dispatch(updateEmail('tim@yahoo.com')) where needed
   password,
   setPassword,
   confirmPw,
@@ -30,11 +37,14 @@ export default function Signup({
   setSelectedA,
   setZipcodes,
 }) {
+  // change the user route
   const navigate = useNavigate();
+  // take out the activities that weren't selected by checking if they aren't in the selectedA object
   const availActivities = allActivities.filter(
     (a) => !selectedA.hasOwnProperty(a)
   );
-
+  //form handles user input for the signup
+  // onSubmit invokes the handleSubmit function which passes in user data as arguments to the server
   return (
     <>
       <header id='header'></header>
@@ -73,7 +83,7 @@ export default function Signup({
           );
         }}
       >
-        {/* top section  */}
+        {/* same setup and logic for each user input field - state will be updated as soon as the user starts typing and the final state values will be passed into the handleSubmit function above */}
         <label htmlFor='email'>Email: </label>
         <input
           id='email'
@@ -83,6 +93,7 @@ export default function Signup({
           required
           onChange={(e) => {
             setEmail(e.target.value);
+            // dispatch(updateEmail(e.target.value))
           }}
         />
         <label htmlFor='password'>Password: </label>
@@ -118,7 +129,8 @@ export default function Signup({
             setFirstName(e.target.value);
           }}
         />
-        {/* activity selection */}
+        {/* activity is a dropdown selector and the state of the activity is also updated onChange */}
+        {/* activities dropdown will show the activites that haven't been selected yet */}
         <label htmlFor='activity'>Choose an activity: </label>
         <select
           id='activity'
@@ -133,6 +145,7 @@ export default function Signup({
             </option>
           ))}
         </select>
+        {/* three different skill selectors that are in the radio button format that will update the SkillLevel in the state onChange */}
         skill level selection
         <p>Choose skill level: </p>
         <div>
@@ -168,7 +181,7 @@ export default function Signup({
           </label>
         </div>
         <br></br>
-        {/* add button */}
+        {/* When this button is clicked it will pass in the current state of the selected activity and skill level into the handleA state */}
         <button
           type='button'
           onClick={() =>
@@ -184,7 +197,7 @@ export default function Signup({
         >
           ADD
         </button>
-        {/* list field */}
+        {/* it is an unordered list that will create list items of the activity and the skill level with a button that lets you delete this specific activity onClick by calling the delete Activity function*/}
         <div id='listField'>
           <ul id='list'>
             {Object.entries(selectedA).map(([activity, skillLevel]) => (
@@ -201,7 +214,7 @@ export default function Signup({
           </ul>
         </div>
         <br></br>
-        {/* get city */}
+        {/* same logic as above*/}
         <label htmlFor='city'>City: </label>
         <input
           id='city'
@@ -213,7 +226,7 @@ export default function Signup({
             setCity(e.target.value);
           }}
         />
-        {/* get zipcode */}
+        {/* same logic as above*/}
         <label htmlFor='zipcode'>Zip Code: </label>
         <input
           id='zipcode'
@@ -225,7 +238,7 @@ export default function Signup({
             setZipCode(e.target.value);
           }}
         />
-        {/* get gender */}
+        {/* dropdown list that has same logic as above */}
         <label htmlFor='gender'>Gender: </label>
         <select
           id='gender'
@@ -255,7 +268,7 @@ export default function Signup({
           }}
         />
         <br></br>
-        {/* buttons */}
+        {/* buttons that will redirect to login endpoint or will trigger the onSubmit event above */}
         <div id='bottom'>
           <Link id='buttonButton' to='/login'>
             Login
