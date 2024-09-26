@@ -12,8 +12,8 @@ import handleSubmit from '../handleSubmit';
 import { useSelector, useDispatch } from 'react-redux';
 
 export default function Signup({
-  email,
-  setEmail,
+  email, // const email = useSelector(state => state.auth.user.email)
+  setEmail, // create a reducer in your auth state (ie. updateEmail), and then call dispatch(updateEmail('tim@yahoo.com')) where needed
   password,
   setPassword,
   confirmPw,
@@ -93,6 +93,7 @@ export default function Signup({
           required
           onChange={(e) => {
             setEmail(e.target.value);
+            // dispatch(updateEmail(e.target.value))
           }}
         />
         <label htmlFor='password'>Password: </label>
