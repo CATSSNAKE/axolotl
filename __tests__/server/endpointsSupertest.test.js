@@ -9,7 +9,7 @@ const { app, server } = require('../../server/server');
  * assigned to the environment variable DATABASE_TEST_URI.  The server
  * looks for this value in a .env file in the project's root folder.
  * 
- * You can run this test with the command: npm run test:server
+ * You can run this test with the command: npm run test:supertest
  * jest.server.config.js also sets configuration options specific to this test
  * and is included in the script portion of package.json.
  */
@@ -132,7 +132,7 @@ describe('userController Tests', () => {
     });
     // this test should be rewritten once validation and error reporting is 
     // more robust
-    it('should respond helpful json when missing login data', async () => {
+    it('should return json with error when missing login data', async () => {
       const response = await request(app)
         .post('/login')
         .send({})
@@ -144,6 +144,7 @@ describe('userController Tests', () => {
         err: expect.any(String)
       });
     });
+    // just tests for a simple cookie
     it('returns a cookie', async () => {
       const response = await request(app)
         .post('/login')
@@ -238,7 +239,7 @@ describe('userController Tests', () => {
       expect(responseUserThree.gender).toEqual(userThree.rows[0].gender);
     });
 
-    it('returns json and status 500 if a field is not provided', async () => {
+    it('returns json error and status 500 if any field is missing', async () => {
       let response = await request(app)
         .get('/main')
         .query({ skillLevel: 'Intermediate', gender: 'Female' })
@@ -349,6 +350,19 @@ describe('userController Tests', () => {
       const cookies = response.headers['set-cookie'];
       expect(cookies).toBeDefined();
       expect(cookies[0]).toContain('test=cookie');
+    });
+
+    it('encrypts the password using bcrypt', async () => {
+      await request(app)
+        .post('/signup')
+        .send(user);
+
+      const selectResult = await db.query(
+        'SELECT password FROM users WHERE email = $1;', [user.email]
+      );
+      const bcryptPassword = selectResult.rows[0].password;
+      const doPasswordsMatch = await bcrypt.compare('password', bcryptPassword);
+      expect(doPasswordsMatch).toBe(true);
     });
 
     /*
