@@ -3,9 +3,9 @@ const app = express();
 const path = require('path');
 const cors = require('cors');
 const PORT = 3000;
-const cookieController = require('../db/controllers/cookieController.js');
+const cookieController = require('./controllers/cookieController.js');
 //import usersController
-const userCont = require('../db/controllers/usersController.js');
+const userCont = require('./controllers/usersController.js');
 
 // parses JSON from incoming request
 app.use(cors());
@@ -73,8 +73,8 @@ app.use((err, req, res, next) => {
   return res.status(errorObj.status).json(errorObj.message);
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server listening on port: ${PORT}...`);
 });
 
-module.exports = app;
+module.exports = { app, server };
