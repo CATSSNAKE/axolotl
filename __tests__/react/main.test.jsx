@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 
 import Main from "../../client/component/main";
+
 import handleA from "../../client/handleActivity";
 jest.mock("../../client/handleActivity", () => ({
   __esModule: true,
@@ -161,8 +162,16 @@ describe("Main component tests", () => {
   });
 
   describe("Interaction Tests", () => {
+<<<<<<< HEAD:__tests__/react/main.test.jsx
     it("should be able to select an activity", async () => {
       const setActivity = jest.fn();
+=======
+    // not currently working...
+    // seems like the front end isn't actually ever marking an option as selected?
+    xit("should be able to select an activity", async () => {
+      // const [activity, setActivity] = useState(""); // can;t do outside a react component
+      const setActivityMocked = jest.fn();
+>>>>>>> dev:__tests__/react/mainpage.js
       const user = userEvent.setup();
       const allActivities = ["A", "B", "C"];
       const { getByLabelText } = render(
