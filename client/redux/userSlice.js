@@ -63,10 +63,40 @@ const userSlice = createSlice({
     setPassword: (state, action) => {
       state.password = action.payload;
     },
+    setConfirmPw: (state, action) => {
+      state.confirmPw = action.payload;
+    },
+    setFirstName: (state, action) => {
+      state.firstName = action.payload;
+    },
+    setCity: (state, action) => {
+      state.city = action.payload;
+    },
+    setZipCode: (state, action) => {
+      state.zipCode = action.payload;
+    },
+    setGender: (state, action) => {
+      state.gender = action.payload;
+    },
+    setPhone: (state, action) => {
+      state.phone = action.payload;
+    },
   },
 });
 //
-export const { setEmail, setPassword, setUserData, login, logout } = userSlice.actions;
+export const {
+  setEmail,
+  setPassword,
+  setConfirmPw,
+  setFirstName,
+  setCity,
+  setZipCode,
+  setGender,
+  setPhone,
+  setUserData,
+  login,
+  logout,
+} = userSlice.actions;
 export default userSlice.reducer;
 
 // import { createSlice } from '@reduxjs/toolkit';
