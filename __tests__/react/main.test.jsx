@@ -1,9 +1,15 @@
-import { expect, jest, it } from "@jest/globals";
-import { render, getAllByRole, waitFor } from "@testing-library/react";
+import { jest } from "@jest/globals";
+import { render, getAllByRole, getByRole } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import React, { useState } from "react";
+import React from "react";
 
 import Main from "../../client/component/main";
+
+import handleA from "../../client/handleActivity";
+jest.mock("../../client/handleActivity", () => ({
+  __esModule: true,
+  default: jest.fn(() => {}),
+}));
 
 describe("Main component tests", () => {
   /* TODO: as the main page is turned from one component with a wall of html as output,
@@ -81,14 +87,16 @@ describe("Main component tests", () => {
       expect(() => getByText("Delete")).not.toThrow();
     });
 
-    it("skill level radio buttons should have Beginner, Intermediate, Advanced", () => {
+    it("skill level dropdown should show Beginner, Intermediate, Advanced options", async () => {
       // implementation driven: uses specific props
-      const { getByRole, getByText } = render(<Main {...minimalProps} />);
-
-      expect(() => getByText(/Choose skill level:/i)).not.toThrow();
-      expect(() => getByRole("radio", { name: "Beginner" })).not.toThrow();
-      expect(() => getByRole("radio", { name: "Intermediate" })).not.toThrow();
-      expect(() => getByRole("radio", { name: "Advanced" })).not.toThrow();
+      const { getByLabelText } = render(<Main {...minimalProps} />);
+      let select;
+      expect(
+        () => (select = getByLabelText("Choose a skill level:"))
+      ).not.toThrow();
+      expect(
+        getAllByRole(select, "option").map((option) => option.textContent)
+      ).toEqual(["", "Beginner", "Intermediate", "Advanced"]);
     });
 
     it("should have an 'Add' button", () => {
@@ -154,86 +162,113 @@ describe("Main component tests", () => {
   });
 
   describe("Interaction Tests", () => {
-    // not currently working...
-    // seems like the front end isn't actually ever marking an option as selected?
-    xit("should be able to select an activity", async () => {
-      // const [activity, setActivity] = useState(""); // can;t do outside a react component
-      const setActivityMocked = jest.fn();
+    it("should be able to select an activity", async () => {
+      const setActivity = jest.fn();
       const user = userEvent.setup();
-      const { getByLabelText, findByRole } = render(
-        <Main
-          {...minimalProps}
-          // activity={activity}
-          setActivity={setActivityMocked}
-          allActivities={["A", "B"]}
-        />
-      );
-
-      await user.selectOptions(getByLabelText(/choose an activity:?/i), "A");
-
-      await waitFor(() => expect(setActivityMocked).toHaveBeenCalled());
-      expect((await findByRole("option", { name: "A" })).selected).toBe(true);
-      expect((await findByRole("option", { name: "B" })).selected).toBe(false);
-    });
-
-    // not currently working...
-    // seems like the front end isn't actually ever marking a radio as selected?
-    xit("should be able to select a skill level", async () => {
-      const user = userEvent.setup();
-      const { getByLabelText, findByRole } = render(<Main {...minimalProps} />);
-
-      await user.click(getByLabelText(/beginner/i));
-      // Definitley not checking anything...
-      //
-      // console.log(
-      //   getAllByRole("radio").map((radio) => `${radio.name}: ${radio.checked}`)
-      // );
-      expect((await findByRole("radio", { name: /beginner/i })).checked).toBe(
-        true
-      );
-    });
-
-    xit("should show added activities", async () => {
-      const setSelectedA = jest.fn();
-      const user = userEvent.setup();
-      const { getByLabelText, getByText } = render(
-        <Main
-          {...minimalProps}
-          setSelectedA={setSelectedA}
-          allActivities={["A"]}
-        />
-      );
-
-      await user.click(getByLabelText(/beginner/i));
-      await user.selectOptions(getByLabelText(/choose an activity:?/i), "A");
-      await user.click(getByText("Add"));
-      expect(setSelectedA).toHaveBeenCalled();
-      expect(() => getByText("A - Beginner")).not.toThrow();
-      expect(() => getByText(/delete/i)).not.toThrow();
-    });
-
-    xit("should delete selected activities and return them to the option list", async () => {
-      const user = userEvent.setup();
-      const allActivities = ["A", "B", "C", "D"];
-      const deleteA = jest.fn();
-      const { getByRole, getAllByRole, getByText } = render(
+      const allActivities = ["A", "B", "C"];
+      const { getByLabelText } = render(
         <Main
           {...minimalProps}
           allActivities={allActivities}
-          selectedA={{ A: true }}
-          deleteA={deleteA}
+          setActivity={setActivity}
         />
       );
 
-      console.log(getByText("Delete"));
-      await user.click(getByText("Delete"));
+      const selectElement = getByLabelText("Choose an activity:");
+      await user.selectOptions(selectElement, "A");
 
-      console.log(getAllByRole("listitem"));
-      expect(deleteA).toHaveBeenCalled();
-      // the list item should have been removed
-      expect(() => getByRole("listitem", { key: "A" })).toThrow();
-      // the deleted Activity should be added back to the options
-      expect(() => getByRole("option", { name: "A" })).not.toThrow();
+      expect(setActivity).toHaveBeenCalled();
+      expect(setActivity).toHaveBeenCalledWith("A");
+
+      expect(getByRole(selectElement, "option", { name: "" }).selected).toBe(
+        false
+      );
+      expect(getByRole(selectElement, "option", { name: "A" }).selected).toBe(
+        true
+      );
+      expect(getByRole(selectElement, "option", { name: "B" }).selected).toBe(
+        false
+      );
+      expect(getByRole(selectElement, "option", { name: "C" }).selected).toBe(
+        false
+      );
     });
+
+    it("should be able to select a skill level", async () => {
+      const setSkillLevel = jest.fn();
+      const user = userEvent.setup();
+      const { getByLabelText } = render(
+        <Main {...minimalProps} setSkillLevel={setSkillLevel} />
+      );
+
+      const selectElement = getByLabelText("Choose a skill level:");
+      await user.selectOptions(selectElement, "Beginner");
+
+      expect(setSkillLevel).toHaveBeenCalled();
+      expect(setSkillLevel).toHaveBeenCalledWith("Beginner");
+
+      expect(getByRole(selectElement, "option", { name: "" }).selected).toBe(
+        false
+      );
+      expect(
+        getByRole(selectElement, "option", { name: "Beginner" }).selected
+      ).toBe(true);
+      expect(
+        getByRole(selectElement, "option", { name: "Intermediate" }).selected
+      ).toBe(false);
+      expect(
+        getByRole(selectElement, "option", { name: "Advanced" }).selected
+      ).toBe(false);
+    });
+
+    xit("should show added activity", async () => {
+      const user = userEvent.setup();
+      const allActivities = ["Golf", "Climbing", "Hiking"];
+
+      const { getByLabelText, getByText, rerender } = render(
+        <Main {...minimalProps} allActivities={allActivities} />
+      );
+
+      await user.selectOptions(
+        getByLabelText(/choose an activity:?/i),
+        "Climbing"
+      );
+      await user.selectOptions(
+        getByLabelText("Choose a skill level:"),
+        "Beginner"
+      );
+      await user.click(getByText("Add"));
+
+      expect(handleA).toHaveBeenCalled();
+      await rerender(<Main {...minimalProps} allActivities={allActivities} />);
+
+      // below fails, as the elements aren't being added to the DOM,
+      // because the state is being held in the App component
+      expect(() => getByText("Climbing - Beginner")).not.toThrow();
+      expect(() => getByText(/delete/i)).not.toThrow();
+    });
+
+    // doesn't work because state is held in higher component
+    xit("should delete selected activities and return them to the option list", async () => {
+      const user = userEvent.setup();
+      const allActivities = ["A", "B", "C", "D"];
+      const { getByRole, getByText } = render(
+        <Main
+          {...minimalProps}
+          allActivities={allActivities}
+          selectedA={{ Golf: "Beginner" }}
+        />
+      );
+
+      await user.click(getByText("Delete"));
+      // the list item should have been removed
+      expect(() =>
+        getByRole("listitem", { name: "Golf - Beginner" })
+      ).toThrow();
+      // the deleted Activity should be added back to the options
+      expect(() => getByRole("option", { name: "Golf" })).not.toThrow();
+    });
+
+    it("should be able to selecte a gender");
   });
 });

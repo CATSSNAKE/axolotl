@@ -4,7 +4,9 @@ import handleA from "../handleActivity";
 import deleteA from "../deleteActivity";
 import handleSubmit from "../handleSubmit";
 import resetEntryMain from "../resetEntryMain";
-// import convertMiles from '../convertMiles';
+
+import Dropdown from "./Dropdown";
+import SelectedActivitiesList from "./SelectedActivitiesList";
 
 export default function Main({
   activity,
@@ -24,20 +26,11 @@ export default function Main({
   setSelectedA,
   zipcodes,
   setZipcodes,
-  // miles,
-  // setMiles,
 }) {
   // const navigate = useNavigate(); // throws errors when trying to test, doesn't seem to be used
   const availActivities = allActivities.filter(
     (a) => !selectedA.hasOwnProperty(a)
   );
-
-  // const handleConversion = (e) => {
-  //   const selectValue = e.target.value;
-  //   setDistance(selectValue);
-  //   const inMeter = convertMiles(selectValue);
-  //   setMiles(inMeter);
-  // };
 
   useEffect(() => {
     // const zipcodes = ['90042', '90036', '90028', '91205'];
@@ -216,56 +209,18 @@ export default function Main({
           });
         }}
       >
-        <label htmlFor="searchActivity">Choose an activity: </label>
-        <select
-          id="searchActivity"
-          className="allInput"
-          value={activity}
-          onChange={(e) => setActivity(e.target.value)}
-        >
-          <option value=""></option>
-          {availActivities.map((a) => (
-            <option key={a} value={a}>
-              {a}
-            </option>
-          ))}
-        </select>
+        <Dropdown
+          labelText="Choose an activity:"
+          updater={(e) => setActivity(e.target.value)}
+          options={availActivities}
+        />
 
-        {/* skill level selection */}
+        <Dropdown
+          labelText="Choose a skill level:"
+          updater={(e) => setSkillLevel(e.target.value)}
+          options={["Beginner", "Intermediate", "Advanced"]}
+        />
 
-        <div className="skillLevelMain">
-          <p>Choose skill level: </p>
-          <label>
-            <input
-              type="radio"
-              name="skillLevel"
-              checked={skillLevel === "Beginner"}
-              value="Beginner"
-              onChange={(e) => setSkillLevel(e.target.value)}
-            ></input>
-            <span></span> Beginner
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="skillLevel"
-              checked={skillLevel === "Intermediate"}
-              value="Intermediate"
-              onChange={(e) => setSkillLevel(e.target.value)}
-            ></input>
-            <span></span> Intermediate
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="skillLevel"
-              checked={skillLevel === "Advanced"}
-              value="Advanced"
-              onChange={(e) => setSkillLevel(e.target.value)}
-            ></input>
-            <span></span> Advanced
-          </label>
-        </div>
         <br></br>
 
         {/* add button */}
@@ -286,22 +241,13 @@ export default function Main({
         </button>
         <br></br>
 
-        {/* list field */}
-        <div id="listFieldMain">
-          <ul id="list">
-            {Object.entries(selectedA).map(([activity, skillLevel]) => (
-              <li key={activity}>
-                {activity} - {skillLevel}
-                <button
-                  type="button"
-                  onClick={() => deleteA(activity, setSelectedA)}
-                >
-                  Delete
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <SelectedActivitiesList
+          selectedActivitySkillLevels={selectedA}
+          updateActivitiesSkillLevels={(activity) =>
+            deleteA(activity, setSelectedA)
+          }
+        />
+
         <br></br>
 
         {/* get city */}
@@ -345,22 +291,11 @@ export default function Main({
         </select> */}
 
         {/* get gender */}
-        <label htmlFor="gender">Gender: </label>
-        <select
-          id="gender"
-          className="allInput"
-          value={gender}
-          required
-          onChange={(e) => {
-            setGender(e.target.value);
-          }}
-        >
-          <option></option>
-          <option label="Prefer not to say">Prefer not to say</option>
-          <option label="Non-binary">Non-binary</option>
-          <option label="Male">Male</option>
-          <option label="Female">Female</option>
-        </select>
+        <Dropdown
+          labelText="Gender:"
+          options={["Prefer not to Say", "Non-binary", "Male", "Female"]}
+          updater={() => {}}
+        />
         <button id="searchButton" type="submit">
           Search
         </button>
