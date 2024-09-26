@@ -4,7 +4,6 @@ import userEvent from "@testing-library/user-event";
 import React, { useState } from "react";
 
 import Main from "../../client/component/main";
-import Dropdown from "../../client/component/Dropdown";
 
 describe("Main component tests", () => {
   /* TODO: as the main page is turned from one component with a wall of html as output,
@@ -155,28 +154,6 @@ describe("Main component tests", () => {
   });
 
   describe("Interaction Tests", () => {
-    // it("should be able to select an activity", async () => {
-    //   const mFunc = jest.fn();
-    //   const user = userEvent.setup();
-    //   const { getByRole, getByLabelText } = render(
-    //     <Dropdown
-    //       labelText="Select:"
-    //       updater={(e) => mFunc(e.target.value)}
-    //       options={["A", "B", "C"]}
-    //     />
-    //   );
-
-    //   await user.selectOptions(getByLabelText("Select:"), "A");
-
-    //   expect(mFunc).toHaveBeenCalled();
-    //   expect(mFunc).toHaveBeenCalledWith("A");
-
-    //   expect(getByRole("option", { name: "" }).selected).toBe(false);
-    //   expect(getByRole("option", { name: "A" }).selected).toBe(true);
-    //   expect(getByRole("option", { name: "B" }).selected).toBe(false);
-    //   expect(getByRole("option", { name: "C" }).selected).toBe(false);
-    // });
-
     // not currently working...
     // seems like the front end isn't actually ever marking an option as selected?
     xit("should be able to select an activity", async () => {
