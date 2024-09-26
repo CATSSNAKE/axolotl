@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import Login from './component/login.jsx';
 import Signup from './component/signup.jsx';
 import Main from './component/main.jsx';
+import { useSelector, useDispatch } from 'react-redux';
+
 // Router allows you to navigate between different pages in a single-page application
 import {
   BrowserRouter as Router,
@@ -33,7 +35,8 @@ export default function App() {
   const [allActivities] = useState(['Golf', 'Hiking', 'Camping', 'Biking']);
   const [selectedA, setSelectedA] = useState({});
   const [zipcodes, setZipcodes] = useState([]);
-  const [isLogin, setIsLogin] = useState(false);
+  // const [isLogin, setIsLogin] = useState(false);
+  const isLogin = useSelector((state) => state.user.isLogin);
   // const [miles, setMiles] = useState(0);
 
   // loginState handler that updates the 'isLogin' variable to true everytime this function is invoked

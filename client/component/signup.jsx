@@ -93,7 +93,7 @@ export default function Signup({
           required
           onChange={(e) => {
             setEmail(e.target.value);
-            // dispatch(updateEmail(e.target.value))
+            dispatch(updateEmail(e.t))
           }}
         />
         <label htmlFor='password'>Password: </label>

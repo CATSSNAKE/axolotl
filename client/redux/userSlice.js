@@ -57,10 +57,16 @@ const userSlice = createSlice({
     logout: (state) => {
       state.isLogin = false;
     },
+    setEmail: (state, action) => {
+      state.email = action.payload;
+    },
+    setPassword: (state, action) => {
+      state.password = action.payload;
+    },
   },
 });
 //
-export const { setUserData, login, logout } = userSlice.actions;
+export const { setEmail, setPassword, setUserData, login, logout } = userSlice.actions;
 export default userSlice.reducer;
 
 // import { createSlice } from '@reduxjs/toolkit';
