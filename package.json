@@ -9,7 +9,10 @@
     "watch:build": "webpack -w",
     "watch:server": "nodemon server/server.js",
     "dev": "npm-run-all --parallel watch:*",
-    "test": "jest"
+    "test": "jest",
+    "test:middlewear": "jest ./__tests__/middleware/usersController.test.js",
+    "test:supertest": "NODE_ENV=server-test jest ./__tests__/server/endpointsSupertest.test.js --config jest.server.config.js",
+    "test:server": "NODE_ENV=server-test jest --config jest.server.config.js"
   },
   "author": "",
   "license": "ISC",
@@ -32,6 +35,7 @@
     "nodemon": "^3.1.7",
     "npm-run-all": "^4.1.5",
     "style-loader": "^4.0.0",
+    "supertest": "^7.0.0",
     "webpack": "^5.94.0",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.1.0"
@@ -43,6 +47,7 @@
     "bcrypt": "^5.1.1",
     "concurrently": "^9.0.1",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "path": "^0.12.7",
     "pg": "^8.13.0",
