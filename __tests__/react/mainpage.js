@@ -155,52 +155,28 @@ describe("Main component tests", () => {
   });
 
   describe("Interaction Tests", () => {
-    // it("should be able to select an activity", async () => {
-    //   const mFunc = jest.fn();
-    //   const user = userEvent.setup();
-    //   const { getByRole, getByLabelText } = render(
-    //     <Dropdown
-    //       labelText="Select:"
-    //       updater={(e) => mFunc(e.target.value)}
-    //       options={["A", "B", "C"]}
-    //     />
-    //   );
-
-    //   await user.selectOptions(getByLabelText("Select:"), "A");
-
-    //   expect(mFunc).toHaveBeenCalled();
-    //   expect(mFunc).toHaveBeenCalledWith("A");
-
-    //   expect(getByRole("option", { name: "" }).selected).toBe(false);
-    //   expect(getByRole("option", { name: "A" }).selected).toBe(true);
-    //   expect(getByRole("option", { name: "B" }).selected).toBe(false);
-    //   expect(getByRole("option", { name: "C" }).selected).toBe(false);
-    // });
-
-    // not currently working...
-    // seems like the front end isn't actually ever marking an option as selected?
-    xit("should be able to select an activity", async () => {
-      // const [activity, setActivity] = useState(""); // can;t do outside a react component
-      const setActivityMocked = jest.fn();
+    it("should be able to select an activity", async () => {
+      const mFunc = jest.fn();
       const user = userEvent.setup();
-      const { getByLabelText, findByRole } = render(
-        <Main
-          {...minimalProps}
-          // activity={activity}
-          setActivity={setActivityMocked}
-          allActivities={["A", "B"]}
+      const { getByRole, getByLabelText } = render(
+        <Dropdown
+          labelText="Select:"
+          updater={(e) => mFunc(e.target.value)}
+          options={["A", "B", "C"]}
         />
       );
 
-      await user.selectOptions(getByLabelText(/choose an activity:?/i), "A");
+      await user.selectOptions(getByLabelText("Select:"), "A");
 
-      await waitFor(() => expect(setActivityMocked).toHaveBeenCalled());
-      expect((await findByRole("option", { name: "A" })).selected).toBe(true);
-      expect((await findByRole("option", { name: "B" })).selected).toBe(false);
+      expect(mFunc).toHaveBeenCalled();
+      expect(mFunc).toHaveBeenCalledWith("A");
+
+      expect(getByRole("option", { name: "" }).selected).toBe(false);
+      expect(getByRole("option", { name: "A" }).selected).toBe(true);
+      expect(getByRole("option", { name: "B" }).selected).toBe(false);
+      expect(getByRole("option", { name: "C" }).selected).toBe(false);
     });
 
-    // not currently working...
-    // seems like the front end isn't actually ever marking a radio as selected?
     xit("should be able to select a skill level", async () => {
       const user = userEvent.setup();
       const { getByLabelText, findByRole } = render(<Main {...minimalProps} />);

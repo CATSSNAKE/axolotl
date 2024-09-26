@@ -4,6 +4,7 @@ import handleA from "../handleActivity";
 import deleteA from "../deleteActivity";
 import handleSubmit from "../handleSubmit";
 import resetEntryMain from "../resetEntryMain";
+import Dropdown from "./Dropdown";
 // import convertMiles from '../convertMiles';
 
 export default function Main({
@@ -216,20 +217,11 @@ export default function Main({
           });
         }}
       >
-        <label htmlFor="searchActivity">Choose an activity: </label>
-        <select
-          id="searchActivity"
-          className="allInput"
-          value={activity}
-          onChange={(e) => setActivity(e.target.value)}
-        >
-          <option value=""></option>
-          {availActivities.map((a) => (
-            <option key={a} value={a}>
-              {a}
-            </option>
-          ))}
-        </select>
+        <Dropdown
+          labelText="Choose an activity:"
+          updater={(e) => setActivity(e.target.value)}
+          options={availActivities}
+        />
 
         {/* skill level selection */}
 
