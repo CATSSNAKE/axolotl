@@ -1,5 +1,7 @@
-import { render, screen, getAllByRole } from "@testing-library/react";
-import React from "react";
+import { expect, jest, it } from "@jest/globals";
+import { render, getAllByRole, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import React, { useState } from "react";
 
 import Main from "../../client/component/main";
 
@@ -8,34 +10,33 @@ describe("Main component tests", () => {
    *   to many components, these unit tests should render specific components instead of the main page
    * As Redux is implemented, the Provider will need to be mocked? and injected instead of props
    */
-
+  const minimalProps = {
+    activity: "",
+    setActivity: () => {},
+    skillLevel: "",
+    setSkillLevel: () => {},
+    city: "",
+    setCity: () => {},
+    zipCode: "",
+    setZipCode: () => {},
+    distance: "",
+    setDistance: () => {},
+    gender: "",
+    setGender: () => {},
+    allActivities: [],
+    selectedA: "",
+    setSelectedA: () => {},
+    zipcodes: [],
+    setZipcodes: () => {},
+  };
   describe("Layout Tests", () => {
     // this is implementation driven, and will need to change when the frontend changes
     // uses specific props
-    const minimalProps = {
-      activity: "",
-      setActivity: () => {},
-      skillLevel: "",
-      setSkillLevel: () => {},
-      city: "",
-      setCity: () => {},
-      zipCode: "",
-      setZipCode: () => {},
-      distance: "",
-      setDistance: () => {},
-      gender: "",
-      setGender: () => {},
-      allActivities: [],
-      selectedA: "",
-      setSelectedA: () => {},
-      zipcodes: [],
-      setZipcodes: () => {},
-    };
 
     it("activity dropdown should show available activities", async () => {
       // implementation driven: uses specific props
       const allActivities = ["A", "B", "C", "D"];
-      const { getByText, getByLabelText } = render(
+      const { getByLabelText } = render(
         <Main {...minimalProps} allActivities={allActivities} />
       );
       let select;
@@ -50,7 +51,7 @@ describe("Main component tests", () => {
     it("activity dropdown shouldn't include activities that have already been selected", async () => {
       // implementation driven: uses specific props
       const allActivities = ["A", "B", "C", "D"];
-      const { getByText, getByLabelText } = render(
+      const { getByLabelText } = render(
         <Main
           {...minimalProps}
           allActivities={allActivities}
@@ -65,6 +66,19 @@ describe("Main component tests", () => {
       expect(
         getAllByRole(select, "option").map((option) => option.textContent)
       ).toEqual(["", ...allActivities.filter((elem) => elem !== "A")]);
+    });
+
+    it("should have a delete button for selected activities", () => {
+      const allActivities = ["A", "B", "C", "D"];
+      const { getByText } = render(
+        <Main
+          {...minimalProps}
+          allActivities={allActivities}
+          selectedA={{ A: true }}
+        />
+      );
+
+      expect(() => getByText("Delete")).not.toThrow();
     });
 
     it("skill level radio buttons should have Beginner, Intermediate, Advanced", () => {
@@ -137,5 +151,89 @@ describe("Main component tests", () => {
     });
 
     it("should have a google map element (Manual check)", () => {});
+  });
+
+  describe("Interaction Tests", () => {
+    // not currently working...
+    // seems like the front end isn't actually ever marking an option as selected?
+    xit("should be able to select an activity", async () => {
+      // const [activity, setActivity] = useState(""); // can;t do outside a react component
+      const setActivityMocked = jest.fn();
+      const user = userEvent.setup();
+      const { getByLabelText, findByRole } = render(
+        <Main
+          {...minimalProps}
+          // activity={activity}
+          setActivity={setActivityMocked}
+          allActivities={["A", "B"]}
+        />
+      );
+
+      await user.selectOptions(getByLabelText(/choose an activity:?/i), "A");
+
+      await waitFor(() => expect(setActivityMocked).toHaveBeenCalled());
+      expect((await findByRole("option", { name: "A" })).selected).toBe(true);
+      expect((await findByRole("option", { name: "B" })).selected).toBe(false);
+    });
+
+    // not currently working...
+    // seems like the front end isn't actually ever marking a radio as selected?
+    xit("should be able to select a skill level", async () => {
+      const user = userEvent.setup();
+      const { getByLabelText, findByRole } = render(<Main {...minimalProps} />);
+
+      await user.click(getByLabelText(/beginner/i));
+      // Definitley not checking anything...
+      //
+      // console.log(
+      //   getAllByRole("radio").map((radio) => `${radio.name}: ${radio.checked}`)
+      // );
+      expect((await findByRole("radio", { name: /beginner/i })).checked).toBe(
+        true
+      );
+    });
+
+    xit("should show added activities", async () => {
+      const setSelectedA = jest.fn();
+      const user = userEvent.setup();
+      const { getByLabelText, getByText } = render(
+        <Main
+          {...minimalProps}
+          setSelectedA={setSelectedA}
+          allActivities={["A"]}
+        />
+      );
+
+      await user.click(getByLabelText(/beginner/i));
+      await user.selectOptions(getByLabelText(/choose an activity:?/i), "A");
+      await user.click(getByText("Add"));
+      expect(setSelectedA).toHaveBeenCalled();
+      expect(() => getByText("A - Beginner")).not.toThrow();
+      expect(() => getByText(/delete/i)).not.toThrow();
+    });
+
+    xit("should delete selected activities and return them to the option list", async () => {
+      const user = userEvent.setup();
+      const allActivities = ["A", "B", "C", "D"];
+      const deleteA = jest.fn();
+      const { getByRole, getAllByRole, getByText } = render(
+        <Main
+          {...minimalProps}
+          allActivities={allActivities}
+          selectedA={{ A: true }}
+          deleteA={deleteA}
+        />
+      );
+
+      console.log(getByText("Delete"));
+      await user.click(getByText("Delete"));
+
+      console.log(getAllByRole("listitem"));
+      expect(deleteA).toHaveBeenCalled();
+      // the list item should have been removed
+      expect(() => getByRole("listitem", { key: "A" })).toThrow();
+      // the deleted Activity should be added back to the options
+      expect(() => getByRole("option", { name: "A" })).not.toThrow();
+    });
   });
 });
