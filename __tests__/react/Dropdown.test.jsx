@@ -4,7 +4,7 @@ import { render } from "@testing-library/react";
 
 import Dropdown from "../../client/component/Dropdown";
 
-describe("Dropdown compoenent", () => {
+describe("<Dropdown />", () => {
   it("should be able to select an from a dropdown", async () => {
     const mFunc = jest.fn();
     const user = userEvent.setup();
