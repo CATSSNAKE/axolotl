@@ -1,39 +1,65 @@
+// required for using JSX and React components
 import React from 'react';
+// from the React library that allows you to navigate to different endpoints and establish links so that the page won't need to reload
 import { Link, useNavigate } from 'react-router-dom';
+// custom function that handles activity that is imported from another folder
 import handleA from '../handleActivity';
+// same as above but this one has the functionality to delete
 import deleteA from '../deleteActivity';
+// custom function that handles form submission and sends the user data over to the server
 import handleSubmit from '../handleSubmit';
-console.log(handleSubmit);
-export default function Signup({
-  email,
+// importing state handler and the state updater that can interact with the store
+import { useSelector, useDispatch } from 'react-redux';
+// importing the necessary actions
+import {
   setEmail,
-  password,
   setPassword,
-  confirmPw,
   setConfirmPw,
-  firstName,
   setFirstName,
-  activity,
-  setActivity,
-  skillLevel,
-  setSkillLevel,
-  city,
   setCity,
-  zipCode,
   setZipCode,
-  gender,
   setGender,
-  phone,
   setPhone,
-  allActivities,
-  selectedA,
-  setSelectedA,
+  setUserData,
+  login,
+  logout,
+} from '../redux/userSlice';
+import {
+  setActivity,
+  setSkillLevel,
+  addActivity,
+  removeActivity,
   setZipcodes,
-}) {
+} from '../redux/activitySlice';
+
+export default function Signup() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  // Accessing Redux state and storing it in this context in the const variable declared
+  const email = useSelector((state) => state.user.email);
+  const password = useSelector((state) => state.user.password);
+  const confirmPw = useSelector((state) => state.user.confirmPw);
+  const firstName = useSelector((state) => state.user.firstName);
+  const city = useSelector((state) => state.user.city);
+  const zipCode = useSelector((state) => state.user.zipCode);
+  const gender = useSelector((state) => state.user.gender);
+  const phone = useSelector((state) => state.user.phone);
+  const selectedA = useSelector((state) => state.activity.selectedA);
+  const allActivities = useSelector((state) => state.activity.allActivities);
+  const skillLevel = useSelector((state) => state.activity.skillLevel);
+  const activity = useSelector((state) => state.activity.activity);
+
+  // Filter available activities
   const availActivities = allActivities.filter(
     (a) => !selectedA.hasOwnProperty(a)
   );
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch(login());
+    navigate('/main');
+  };
 
   return (
     <>
@@ -51,29 +77,15 @@ export default function Signup({
             null,
             firstName,
             confirmPw,
-            {
-              activity: selectedA,
-            },
+            { activity: selectedA },
             city,
             zipCode,
             gender,
-            phone,
-            setZipcodes,
-            setEmail,
-            setPassword,
-            setConfirmPw,
-            setFirstName,
-            setActivity,
-            setSkillLevel,
-            setCity,
-            setZipCode,
-            setGender,
-            setPhone,
-            setSelectedA
+            phone
           );
         }}
       >
-        {/* top section  */}
+        {/* Email Input */}
         <label htmlFor='email'>Email: </label>
         <input
           id='email'
@@ -82,9 +94,11 @@ export default function Signup({
           type='email'
           required
           onChange={(e) => {
-            setEmail(e.target.value);
+            dispatch(setEmail(e.target.value));
           }}
         />
+
+        {/* Password Input */}
         <label htmlFor='password'>Password: </label>
         <input
           id='password'
@@ -93,9 +107,11 @@ export default function Signup({
           type='password'
           required
           onChange={(e) => {
-            setPassword(e.target.value);
+            dispatch(setPassword(e.target.value));
           }}
         />
+
+        {/* Confirm Password Input */}
         <label htmlFor='conPassword'>Confirm Password: </label>
         <input
           id='conPassword'
@@ -104,9 +120,11 @@ export default function Signup({
           type='password'
           required
           onChange={(e) => {
-            setConfirmPw(e.target.value);
+            dispatch(setConfirmPw(e.target.value));
           }}
         />
+
+        {/* First Name Input */}
         <label htmlFor='firstName'>First Name: </label>
         <input
           id='firstName'
@@ -115,16 +133,17 @@ export default function Signup({
           type='text'
           required
           onChange={(e) => {
-            setFirstName(e.target.value);
+            dispatch(setFirstName(e.target.value));
           }}
         />
-        {/* activity selection */}
+
+        {/* Activity Selector */}
         <label htmlFor='activity'>Choose an activity: </label>
         <select
           id='activity'
           className='allInput'
           value={activity}
-          onChange={(e) => setActivity(e.target.value)}
+          onChange={(e) => dispatch(setActivity(e.target.value))}
         >
           <option value=''></option>
           {availActivities.map((a) => (
@@ -133,7 +152,8 @@ export default function Signup({
             </option>
           ))}
         </select>
-        skill level selection
+
+        {/* Skill Level Radio Buttons */}
         <p>Choose skill level: </p>
         <div>
           <label>
@@ -142,8 +162,10 @@ export default function Signup({
               name='skillLevel'
               checked={skillLevel === 'Beginner'}
               value='Beginner'
-              onChange={(e) => setSkillLevel(e.target.value)}
-            ></input>
+              onChange={(e) => {
+                dispatch(setSkillLevel(e.target.value));
+              }}
+            />
             <span></span> Beginner
           </label>
           <label>
@@ -152,8 +174,10 @@ export default function Signup({
               name='skillLevel'
               checked={skillLevel === 'Intermediate'}
               value='Intermediate'
-              onChange={(e) => setSkillLevel(e.target.value)}
-            ></input>
+              onChange={(e) => {
+                dispatch(setSkillLevel(e.target.value));
+              }}
+            />
             <span></span> Intermediate
           </label>
           <label>
@@ -162,29 +186,32 @@ export default function Signup({
               name='skillLevel'
               checked={skillLevel === 'Advanced'}
               value='Advanced'
-              onChange={(e) => setSkillLevel(e.target.value)}
-            ></input>
+              onChange={(e) => {
+                dispatch(setSkillLevel(e.target.value));
+              }}
+            />
             <span></span> Advanced
           </label>
         </div>
-        <br></br>
-        {/* add button */}
+        <br />
+
+        {/* Add Activity Button */}
         <button
           type='button'
-          onClick={() =>
-            handleA(
-              activity,
-              setActivity,
-              selectedA,
-              setSelectedA,
-              skillLevel,
-              setSkillLevel
-            )
-          }
+          onClick={(e) => {
+            e.preventDefault(); // This prevents the default action of the button
+            dispatch(
+              addActivity({
+                activity: activity,
+                skillLevel: skillLevel,
+              })
+            );
+          }}
         >
           ADD
         </button>
-        {/* list field */}
+
+        {/* Selected Activities List */}
         <div id='listField'>
           <ul id='list'>
             {Object.entries(selectedA).map(([activity, skillLevel]) => (
@@ -192,7 +219,7 @@ export default function Signup({
                 {activity} - {skillLevel}
                 <button
                   type='button'
-                  onClick={() => deleteA(activity, setSelectedA)}
+                  onClick={() => dispatch(removeActivity(activity))}
                 >
                   Delete
                 </button>
@@ -200,8 +227,9 @@ export default function Signup({
             ))}
           </ul>
         </div>
-        <br></br>
-        {/* get city */}
+        <br />
+
+        {/* City Input */}
         <label htmlFor='city'>City: </label>
         <input
           id='city'
@@ -209,11 +237,10 @@ export default function Signup({
           value={city}
           type='text'
           required
-          onChange={(e) => {
-            setCity(e.target.value);
-          }}
+          onChange={(e) => dispatch(setCity(e.target.value))}
         />
-        {/* get zipcode */}
+
+        {/* Zip Code Input */}
         <label htmlFor='zipcode'>Zip Code: </label>
         <input
           id='zipcode'
@@ -221,20 +248,17 @@ export default function Signup({
           value={zipCode}
           type='text'
           required
-          onChange={(e) => {
-            setZipCode(e.target.value);
-          }}
+          onChange={(e) => dispatch(setZipCode(e.target.value))}
         />
-        {/* get gender */}
+
+        {/* Gender Selector */}
         <label htmlFor='gender'>Gender: </label>
         <select
           id='gender'
           className='allInput'
           value={gender}
           required
-          onChange={(e) => {
-            setGender(e.target.value);
-          }}
+          onChange={(e) => dispatch(setGender(e.target.value))}
         >
           <option></option>
           <option label='Prefer not to say'>Prefer not to say</option>
@@ -242,7 +266,8 @@ export default function Signup({
           <option label='Male'>Male</option>
           <option label='Female'>Female</option>
         </select>
-        {/* get cell# */}
+
+        {/* Phone Number Input */}
         <label htmlFor='phone'>Phone Number: </label>
         <input
           id='phone'
@@ -250,12 +275,11 @@ export default function Signup({
           value={phone}
           type='text'
           required
-          onChange={(e) => {
-            setPhone(e.target.value);
-          }}
+          onChange={(e) => dispatch(setPhone(e.target.value))}
         />
-        <br></br>
-        {/* buttons */}
+        <br />
+
+        {/* Buttons for navigation */}
         <div id='bottom'>
           <Link id='buttonButton' to='/login'>
             Login

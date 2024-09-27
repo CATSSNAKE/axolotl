@@ -1,23 +1,24 @@
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const Dotenv = require("dotenv-webpack");
 
 const HtmlWebpackPluginConfig = new HtmlWebpackPlugin({
-  template: './client/index.html',
-  filename: 'index.html',
-  inject: 'body',
+  template: "./client/index.html",
+  filename: "index.html",
+  inject: "body",
 });
 
 module.exports = {
-  mode: 'development',
-  entry: './client/index.js', // Your entry point
+  mode: "development",
+  entry: "./client/index.js", // Your entry point
   output: {
-    path: path.resolve(__dirname, 'dist'), // Output directory
-    filename: 'bundle.js', // Output filename
+    path: path.resolve(__dirname, "dist"), // Output directory
+    filename: "bundle.js", // Output filename
   },
 
   devServer: {
     static: {
-      directory: path.join(__dirname, 'dist'),
+      directory: path.join(__dirname, "dist"),
     },
     port: 8080,
     hot: true,
@@ -25,14 +26,18 @@ module.exports = {
   },
   module: {
     rules: [
-      { test: /\.jsx?$/, use: 'babel-loader', exclude: /node_modules/ },
-      { test: /\.css$/, use: ['style-loader', 'css-loader'] },
+      {
+        test: /\.jsx?$/,
+        use: "babel-loader",
+        exclude: [/node_modules/, /__tests__/],
+      },
+      { test: /\.css$/, use: ["style-loader", "css-loader"] },
     ],
   },
   resolve: {
-    extensions: ['.js', '.jsx', '.json'],
+    extensions: [".js", ".jsx", ".json"],
   },
-  plugins: [HtmlWebpackPluginConfig],
+  plugins: [HtmlWebpackPluginConfig, new Dotenv()],
 };
 
 //webpack.config.js

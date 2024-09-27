@@ -1,16 +1,26 @@
+//importing React functionality - able to use JSX and React specific features like useState (Hook that lets you add state to functional components)
 import React, { useState } from 'react';
+// import Login, Signup, Main from their respective files
 import Login from './component/login.jsx';
 import Signup from './component/signup.jsx';
 import Main from './component/main.jsx';
+import { useSelector, useDispatch } from 'react-redux';
+
+// Router allows you to navigate between different pages in a single-page application
 import {
   BrowserRouter as Router,
+  // Route defines a specific route in the app (/login, /signup)
   Route,
+  // Container for all the route components
   Routes,
+  // allows you to redirect users to another route ex. (/main to /user if user is not logged in)
   Navigate,
 } from 'react-router-dom';
+// importing css file that styles the components
 import './style.css';
-
+// exporting the App component which is the "main parent component"
 export default function App() {
+  // state hook definitions for each input value
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPw, setConfirmPw] = useState('');
@@ -25,14 +35,17 @@ export default function App() {
   const [allActivities] = useState(['Golf', 'Hiking', 'Camping', 'Biking']);
   const [selectedA, setSelectedA] = useState({});
   const [zipcodes, setZipcodes] = useState([]);
-  const [isLogin, setIsLogin] = useState(false);
+  // const [isLogin, setIsLogin] = useState(false);
+  const isLogin = useSelector((state) => state.user.isLogin);
   // const [miles, setMiles] = useState(0);
 
+  // loginState handler that updates the 'isLogin' variable to true everytime this function is invoked
   const loginState = () => {
     setIsLogin(true);
   };
 
   return (
+    //Router handles all routes and allows the user to switch from path to path, whilst handling the browser history
     <>
       <Router>
         <Routes>

@@ -1,68 +1,30 @@
 import React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import handleSubmit from '../handleSubmit';
-
-export default function Login({
-  email,
+import {
   setEmail,
-  password,
   setPassword,
-  loginState,
-  confirmPw,
-  setConfirmPw,
-  setFirstName,
-  setActivity,
-  setSkillLevel,
-  city,
-  setCity,
-  zipCode,
-  setZipCode,
-  gender,
-  setGender,
-  phone,
-  setPhone,
-  selectedA,
-  setSelectedA,
-  setZipcodes,
-}) {
+  login,
+  logout,
+  setUserData,
+} from '../redux/userSlice';
+
+export default function Login() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const email = useSelector((state) => state.user.email);
+  const password = useSelector((state) => state.user.password);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch(login());
+    navigate('/main');
+  };
   return (
     <>
       <header id='header'></header>
-      <form
-        className='loginInfo'
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSubmit(
-            e,
-            '/login',
-            email,
-            password,
-            navigate,
-            loginState,
-            confirmPw,
-            {
-              activity: selectedA,
-            },
-            city,
-            zipCode,
-            gender,
-            phone,
-            setZipcodes,
-            setEmail,
-            setPassword,
-            setConfirmPw,
-            setFirstName,
-            setActivity,
-            setSkillLevel,
-            setCity,
-            setZipCode,
-            setGender,
-            setPhone,
-            setSelectedA
-          );
-        }}
-      >
+      <form className='loginInfo' onSubmit={handleSubmit}>
         <label htmlFor='email'>Email: </label>
         <input
           id='email'
@@ -71,7 +33,7 @@ export default function Login({
           type='email'
           required
           onChange={(e) => {
-            setEmail(e.target.value);
+            dispatch(setEmail(e.target.value));
           }}
         />
         <label htmlFor='password'>Password: </label>
@@ -82,12 +44,14 @@ export default function Login({
           type='password'
           required
           onChange={(e) => {
-            setPassword(e.target.value);
+            dispatch(setPassword(e.target.value));
           }}
         />
         <br></br>
         <div id='bottom'>
-          <button id='linkButton'>Login</button>
+          <button id='linkButton' type='submit'>
+            Login
+          </button>
           <Link id='buttonButton' to='/signup'>
             Signup
           </Link>
